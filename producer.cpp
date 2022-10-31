@@ -10,11 +10,13 @@ int main(){
 
     shared_str *pc = (shared_str*)shmat(shared_mem_id, NULL, 0);
     
-    if(sem_init(&(pc->sema), 1, 0) != 0){                      //semaphore = 1 and shared by processes               
+    //semaphore = 1 and shared by processes  
+    if(sem_init(&(pc->sema), 1, 0) != 0){              
         std::cerr << "sem_init";
         exit(EXIT_FAILURE);
     }
-        char next_char = 'A';                                  //put first item in table and ' ' in 2nd pos
+        //put first item in table
+        char next_char = 'A';                              
         std::cout << std::endl << "Producer Entered Critical Section\n";
         pc->in = 0;
         pc->table[pc->in] = next_char;
@@ -24,7 +26,8 @@ int main(){
                   << pc->in << std::endl;
         pc->in = (pc->in + 1) % 2;
 
-    if(sem_post(&(pc->sema)) != 0){                             //1st item in table and ++semaphore
+    
+    if(sem_post(&(pc->sema)) != 0){                            
         std::cerr << "sem_post";
         exit(EXIT_FAILURE);
     }
@@ -32,7 +35,8 @@ int main(){
     int items_produced = 1;
 
     while(items_produced < 10){
-        if(sem_wait(&(pc->sema)) != 0){                         //wait until semaphore > 0
+        
+        if(sem_wait(&(pc->sema)) != 0){ 
             std::cerr << "sem_wait";
             exit(EXIT_FAILURE);
         }
@@ -54,12 +58,8 @@ int main(){
         sleep(1);                                            
     }
     
-    if(sem_close(&(pc->sema)) != 0){                                //deallocate named semaphore
-        std::cerr << "sem_close_prod\n";
-        exit(EXIT_FAILURE);
-    }
-
-    if(shmdt(((void*)pc)) == -1){                               //detach shared memory
+    //detach shared memory
+    if(shmdt(((void*)pc)) == -1){                               
         std::cerr << "shmdt_prod\n";
         exit(EXIT_FAILURE);
     }
