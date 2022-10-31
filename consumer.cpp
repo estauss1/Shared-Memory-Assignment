@@ -1,5 +1,8 @@
 #include "pc_structure.hpp"
 
+#define     shared_table    pc->table
+#define     out_pos         pc->out
+
 int main(){
 
     int shared_mem_id = shmget((key_t)222, sizeof(shared_str), 0666);
@@ -11,22 +14,22 @@ int main(){
     shared_str *pc = (shared_str*)shmat(shared_mem_id, NULL, 0);
 
     int items_consumed = 0;
-    pc->out = 0;
-    
-    while(items_consumed < 10){
+    out_pos = 0;
+
+    while(items_consumed < 6){
         if(sem_wait(&(pc->sema)) != 0){
             std::cerr << "sem_wait";
             exit(EXIT_FAILURE);
         }
 
-        if(pc->table[pc->out] != ' '){
+        if(shared_table[out_pos] != ' '){
             ++items_consumed;
             std::cout << "Consumer Entered Critical Section\n"
-                      << "The character '" << pc->table[pc->out] 
+                      << "The character '" << shared_table[out_pos] 
                       << "' was read from table position: " 
-                      << pc->out << std::endl;
-            pc->table[pc->out] = ' ';
-            pc->out = (pc->out + 1) % 2;
+                      << out_pos << std::endl << std::endl;
+            shared_table[out_pos] = ' ';
+            out_pos = (out_pos + 1) % 2;
         }
 
         if(sem_post(&(pc->sema)) != 0){
