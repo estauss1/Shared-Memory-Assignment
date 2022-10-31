@@ -20,7 +20,8 @@ int main(){
         if(pc->table[pc->out] != ' '){
             ++items_consumed;
             std::cout << "Consumer Entered Critical Section\n";
-            std::cout << "The character '" << pc->table[pc->out] << "' was read from table position: " 
+            std::cout << "The character '" << pc->table[pc->out] 
+                      << "' was read from table position: " 
                       << pc->out << std::endl;
             pc->table[pc->out] = ' ';
             pc->out = (pc->out + 1) % 2;
@@ -32,9 +33,19 @@ int main(){
         }
     }
 
-    if(sem_close(&(pc->sema)) != 0){
+    if(sem_close(&(pc->sema)) != 0){                                //deallocate named semaphore
         std::cerr << "sem_close_con\n";
         exit(EXIT_FAILURE);
     }
+    
 
+     if(shmdt(((void*)pc)) == -1){                                  //detach shared memory
+        std::cerr << "shmdt_con\n";
+        exit(EXIT_FAILURE);
+     }
+
+     if(shmctl(shared_mem_id, IPC_RMID, NULL) == -1){               //destroy shared memory
+        std::cerr << "shmctl\n";
+        exit(EXIT_FAILURE);
+     }
 }

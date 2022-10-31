@@ -14,10 +14,11 @@ int main(){
         std::cerr << "sem_init";
         exit(EXIT_FAILURE);
     }
-        char next_char = 'A';
+        char next_char = 'A';                                  //put first item in table and ' ' in 2nd pos
         std::cout << std::endl << "Producer Entered Critical Section\n";
         pc->in = 0;
         pc->table[pc->in] = next_char;
+        pc->table[1] = ' ';
         ++next_char;
         std::cout << "'"<< pc->table[pc->in] <<"' placed in table at position: " 
                   << pc->in << std::endl;
@@ -50,10 +51,16 @@ int main(){
             std::cerr << "sem_post";
             exit(EXIT_FAILURE);
         }
-        sleep(1);
+        sleep(1);                                            
     }
-    if(sem_close(&(pc->sema)) != 0){
+    
+    if(sem_close(&(pc->sema)) != 0){                                //deallocate named semaphore
         std::cerr << "sem_close_prod\n";
+        exit(EXIT_FAILURE);
+    }
+
+    if(shmdt(((void*)pc)) == -1){                               //detach shared memory
+        std::cerr << "shmdt_prod\n";
         exit(EXIT_FAILURE);
     }
 }
