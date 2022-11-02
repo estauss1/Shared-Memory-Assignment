@@ -4,6 +4,7 @@
 #define     out_pos         pc->out
 
 int main(){
+    sleep(1); //give producer time to create shared memory
 
     int shared_mem_id = shmget((key_t)222, sizeof(shared_str), 0666);
     if(shared_mem_id == -1){
